@@ -48,6 +48,10 @@
     <Compile Include="BuiltDependencyCommand.cs" />
     <Compile Include="Extension\ProjectExtension.cs" />
     <Compile Include="Extension\SolutionExtension.cs" />
+    <Compile Include="OptionPage\MultiSolutionBuildConfigOptionPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OptionPage\StringArrayConvertor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MultiSolutionBuildPackage.cs" />
   </ItemGroup>

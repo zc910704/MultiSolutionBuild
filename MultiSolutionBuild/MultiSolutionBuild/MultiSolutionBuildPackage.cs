@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using MultiSolutionBuild.OptionPage;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -23,6 +24,8 @@ namespace MultiSolutionBuild
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
+    [ProvideOptionPage(typeof(MultiSolutionBuildConfigOptionPage), "MultiSolution Config Category", "MultiSolution Option Page", 1000, 1001, false)]
+
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(MultiSolutionBuildPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
