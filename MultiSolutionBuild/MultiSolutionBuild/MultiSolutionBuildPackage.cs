@@ -24,7 +24,7 @@ namespace MultiSolutionBuild
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
-    [ProvideOptionPage(typeof(MultiSolutionBuildConfigOptionPage), "MultiSolution Config Category", "MultiSolution Option Page", 1000, 1001, false)]
+    [ProvideOptionPage(typeof(DialogPageProvider.General), "MultiSolution Config Category", "MultiSolution Option Page", 0, 0, false)]
 
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(MultiSolutionBuildPackage.PackageGuidString)]
