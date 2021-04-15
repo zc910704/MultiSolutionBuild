@@ -11,6 +11,7 @@ using VSLangProj;
 using MultiSolutionBuild.Extension;
 using Task = System.Threading.Tasks.Task;
 using Microsoft;
+using MultiSolutionBuild.OptionPage;
 
 namespace MultiSolutionBuild
 {
@@ -89,7 +90,6 @@ namespace MultiSolutionBuild
 
             DTE = await package.GetServiceAsync(typeof(DTE)) as DTE;
             Assumes.Present(DTE);
-            DTE.Solution.Open(@"E:\workSpace\ConsoleApp1\ConsoleApp1.sln");
            /* var projects = DTE.Solution.GetDescendantProjects();
 
             foreach (var prj in projects)
@@ -119,6 +119,18 @@ namespace MultiSolutionBuild
             string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
             string title = "BuiltDependencyCommand";
 
+
+            // Call the Instance singleton from the UI thread is easy
+            //string[] solutionLocations = GeneralOptions.Instance.SolutionLocations;
+
+
+                /*System.Threading.Tasks.Task.Run(async () =>
+                {
+                    // Make the call to GetLiveInstanceAsync from a background thread to avoid blocking the UI thread
+                    GeneralOptions options = await GeneralOptions.GetLiveInstanceAsync();
+                    string message = options.Message;
+                    // Do something with message
+                });*/
 
             // Show a message box to prove we were here
             VsShellUtilities.ShowMessageBox(
