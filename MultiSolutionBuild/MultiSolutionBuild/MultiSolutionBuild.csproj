@@ -48,8 +48,8 @@
     <Compile Include="Commands\BuiltDependencyCommand.cs" />
     <Compile Include="Extension\ProjectExtension.cs" />
     <Compile Include="Extension\SolutionExtension.cs" />
-    <Compile Include="Log\ImageBuilder.cs" />
-    <Compile Include="Log\OutputPaneLog.cs" />
+    <Compile Include="Utilities\LogUI\ImageBuilder.cs" />
+    <Compile Include="Utilities\LogUI\OutputPaneLog.cs" />
     <Compile Include="OptionPage\BaseOptionModel.cs" />
     <Compile Include="OptionPage\BaseOptionPage.cs">
       <SubType>Component</SubType>
