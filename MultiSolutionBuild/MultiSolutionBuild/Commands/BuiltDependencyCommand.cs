@@ -20,6 +20,14 @@ namespace MultiSolutionBuild
     /// </summary>
     internal sealed class BuiltDependencyCommand
     {
+        private static readonly string[] DefaultProjectTypesExtensions =
+        {
+            "*.csproj",
+            "*.fsproj",
+            "*.vbproj",
+            "*.shproj",
+            "*.sqlproj"
+        };
         /// <summary>
         /// Command ID.
         /// </summary>
@@ -121,7 +129,7 @@ namespace MultiSolutionBuild
 
 
             // Call the Instance singleton from the UI thread is easy
-            //string[] solutionLocations = GeneralOptions.Instance.SolutionLocations;
+            string[] solutionLocations = GeneralOptions.Instance.SolutionLocations;
 
 
                 /*System.Threading.Tasks.Task.Run(async () =>
@@ -140,6 +148,50 @@ namespace MultiSolutionBuild
                 OLEMSGICON.OLEMSGICON_INFO,
                 OLEMSGBUTTON.OLEMSGBUTTON_OK,
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+        }
+
+        private async void LoadProjects(object obj)
+        {
+            if (IsLoading)
+            {
+                throw new InvalidOperationException("Loading already in progress.");
+            }
+
+            _LoadingCancelationTokenSource = new CancellationTokenSource();
+            try
+            {
+                LoadingStatus = "Searching for project files started.";
+                IsLoading = true;
+                var progressUpdater = new Progress<int>(numberOfFoundProjects =>
+                {
+                    LoadingStatus = $"Searching for project files. Already found {numberOfFoundProjects} projects.";
+                });
+                var projectFilesExtensions = GetProjectFilesExtensions();
+                var folder = FolderPath;
+                var files = await _FileEnumerationHelper.FindFilesAsync(
+                    folder, projectFilesExtensions, _LoadingCancelationTokenSource.Token,
+                    progressUpdater);
+
+                LoadingStatus = "Searching completed. Preparing data for display.";
+                var fsItemViewModels = await _ViewModelMapper
+                    .MapFilesToViewModelAsync(folder, files, _LoadingCancelationTokenSource.Token);
+                if (_LoadingCancelationTokenSource.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                _ProjectsLoadedCallback(fsItemViewModels);
+                _WindowService.CloseLoadProjectsWindow();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                IsLoading = false;
+                _LoadingCancelationTokenSource.Dispose();
+                _LoadingCancelationTokenSource = null;
+            }
         }
     }
 }
