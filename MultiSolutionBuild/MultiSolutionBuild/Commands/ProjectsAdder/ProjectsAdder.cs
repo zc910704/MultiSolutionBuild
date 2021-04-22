@@ -32,6 +32,8 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         public static DTE DTE { get; private set; }
 
+        private readonly IMapper _ViewModelMapper;
+
 #pragma warning disable S1118 // Utility classes should not have public constructors
         public ProjectsAdder(DTE dte)
 #pragma warning restore S1118 // Utility classes should not have public constructors
@@ -39,14 +41,12 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             DTE = dte;
         }
 
-
-        private async IEnumerable<string> LoadProjects(string folder)
+        public async void LoadProjects(string folder)
         {
             if (IsLoading)
             {
                 throw new InvalidOperationException("Loading already in progress.");
             }
-
             _LoadingCancelationTokenSource = new CancellationTokenSource();
             try
             {
@@ -60,11 +60,9 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                     folder, DefaultProjectTypesExtensions, _LoadingCancelationTokenSource.Token,
                     progressUpdater);
                 LoadingStatus = "Searching completed. Preparing data for display.";
-                return files;
             }
             catch (OperationCanceledException)
             {
-
             }
             finally
             {
@@ -72,7 +70,6 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                 _LoadingCancelationTokenSource.Dispose();
                 _LoadingCancelationTokenSource = null;
             }
-            return null;
         }
 
     }
