@@ -46,9 +46,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\BuiltDependencyCommand.cs" />
-    <Compile Include="Commands\ProjectsAdder\FsItemCollection.cs" />
-    <Compile Include="Commands\ProjectsAdder\VsDirectory.cs" />
-    <Compile Include="Commands\ProjectsAdder\VsSolution.cs" />
+    <Compile Include="Commands\ProjectsAdder\FsItemBuildSolutionItemHierarchyVisitor.cs" />
+    <Compile Include="Commands\ProjectsAdder\SolutionItemsCount.cs" />
+    <Compile Include="Commands\ProjectsAdder\VsItemCollection.cs" />
+    <Compile Include="Commands\ProjectsAdder\VsDirectoryItem.cs" />
+    <Compile Include="Commands\ProjectsAdder\VsSolutionItem.cs" />
     <Compile Include="Commands\ProjectsAdder\IVsSolutionItem.cs" />
     <Compile Include="Commands\ProjectsAdder\IVsSolutionItemVisitor.cs" />
     <Compile Include="Commands\ProjectsAdder\IMapper.cs" />

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace MultiSolutionBuild.Commands.ProjectsAdder
 {
-    public class FsItemCollection : IList<IVsSolutionItem>
+    public class VsItemCollection : IList<IVsSolutionItem>
     {
-        private readonly VsDirectory _Directory;
+        private readonly VsDirectoryItem _Directory;
         private readonly List<IVsSolutionItem> _FileSystemItems = new List<IVsSolutionItem>();
 
-        public FsItemCollection(VsDirectory directory)
+        public VsItemCollection(VsDirectoryItem directory)
         {
             _Directory = directory ?? throw new ArgumentNullException(nameof(directory));
         }

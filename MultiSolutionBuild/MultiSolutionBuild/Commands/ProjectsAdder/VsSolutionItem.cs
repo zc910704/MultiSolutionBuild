@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace MultiSolutionBuild.Commands.ProjectsAdder
 {
-    public class VsDirectory : IVsSolutionItem, IEquatable<VsDirectory>
+    public class VsSolutionItem : IVsSolutionItem, IEquatable<VsSolutionItem>
     {
-        public VsDirectory(string directoryName)
+        public VsSolutionItem(string fileName, string filePath)
         {
-            Name = directoryName ?? throw new ArgumentNullException(nameof(directoryName));
-            ChildItems = new FsItemCollection(this);
+            Name = fileName ?? throw new ArgumentNullException(nameof(fileName));
+            FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
         }
-        public FsItemCollection ChildItems { get; }
 
-        public bool Equals(VsDirectory other)
+        public string FilePath { get; }
+
+        public bool Equals(VsSolutionItem other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
-                   ChildItems.Count == other.ChildItems.Count &&
-                   ChildItems.All(other.ChildItems.Contains);
+                   string.Equals(FilePath, other.FilePath, StringComparison.OrdinalIgnoreCase);
         }
 
         public void Accept(IVsSolutionItemVisitor visitor)
@@ -32,19 +32,19 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         public IEnumerable<IVsSolutionItem> GetAllChildFileSystemItems()
         {
-            return ChildItems.Concat(ChildItems.SelectMany(c => c.GetAllChildFileSystemItems()));
+            return Enumerable.Empty<IVsSolutionItem>();
         }
 
         public string Name { get; }
 
-        public VsDirectory Parent { get; set; }
+        public VsDirectoryItem Parent { get; set; }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((VsDirectory)obj);
+            return Equals((VsSolutionItem)obj);
         }
 
         public override int GetHashCode()

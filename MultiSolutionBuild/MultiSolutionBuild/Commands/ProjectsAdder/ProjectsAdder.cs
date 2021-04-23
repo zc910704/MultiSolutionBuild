@@ -32,7 +32,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         public static DTE DTE { get; private set; }
 
-        private readonly IMapper _ViewModelMapper;
+        private readonly IMapper _ViewModelMapper = Mapper.Instance;
 
 #pragma warning disable S1118 // Utility classes should not have public constructors
         public ProjectsAdder(DTE dte)
@@ -41,7 +41,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             DTE = dte;
         }
 
-        public async void LoadProjects(string folder)
+        public async Task LoadProjects(string folder)
         {
             if (IsLoading)
             {
@@ -60,6 +60,10 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                     folder, DefaultProjectTypesExtensions, _LoadingCancelationTokenSource.Token,
                     progressUpdater);
                 LoadingStatus = "Searching completed. Preparing data for display.";
+
+                var fsItemViewModels = await _ViewModelMapper
+                    .MapFilesToViewModelAsync(folder, files, _LoadingCancelationTokenSource.Token);
+                AddProject(fsItemViewModels);
             }
             catch (OperationCanceledException)
             {
@@ -72,5 +76,12 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             }
         }
 
+        private void AddProject(IVsSolutionItem[] fsItemViewModels)
+        {
+            var solutionItemHierarchyBuilder = new FsItemBuildSolutionItemHierarchyVisitor();
+            var solutionItemHierarchy = solutionItemHierarchyBuilder.BuildSolutionItemHierarchy(fsItemViewModels);
+            var addProjectsProgress =
+                new AddMultipleProjectsProgressViewModel(_WindowService, _Solution, this, solutionItemHierarchy);
+        }
     }
 }

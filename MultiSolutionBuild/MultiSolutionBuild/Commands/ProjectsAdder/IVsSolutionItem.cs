@@ -10,7 +10,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
     {
         string Name { get; }
 
-        VsDirectory Parent { get; set; }
+        VsDirectoryItem Parent { get; set; }
 
         void Accept(IVsSolutionItemVisitor visitor);
 

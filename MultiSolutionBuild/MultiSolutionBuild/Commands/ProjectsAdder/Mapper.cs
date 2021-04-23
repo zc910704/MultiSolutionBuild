@@ -44,7 +44,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             var directorySeparatorChars = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
             var parentPathParts =
                 rootDirectoryPath.Split(directorySeparatorChars, StringSplitOptions.RemoveEmptyEntries);
-            VsDirectory parentDirectory = null;
+            VsDirectoryItem parentDirectory = null;
             foreach (var filePath in files)
             {
                 if (filePath == null)
@@ -65,14 +65,14 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                 if (filePathParts.Length == 1)
                 {
                     var fileName = GetFileNameWithoutExtension(filePathParts[0]);
-                    yield return new VsSolution(fileName, filePath);
+                    yield return new VsSolutionItem(fileName, filePath);
                 }
                 else if (filePathParts.Length > 1)
                 {
                     if (parentDirectory == null)
                     {
                         var parentDirectoryName = parentPathParts[parentPathParts.Length - 1];
-                        parentDirectory = new VsDirectory(parentDirectoryName);
+                        parentDirectory = new VsDirectoryItem(parentDirectoryName);
                     }
 
                     var processedDirectoryParent = parentDirectory;
@@ -81,12 +81,12 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                         var subDirectoryName = filePathParts[i];
                         var subDirectory = processedDirectoryParent
                             .ChildItems
-                            .OfType<VsDirectory>()
+                            .OfType<VsDirectoryItem>()
                             .SingleOrDefault(d =>
                                 string.Equals(d.Name, subDirectoryName, StringComparison.OrdinalIgnoreCase));
                         if (subDirectory == null)
                         {
-                            subDirectory = new VsDirectory(subDirectoryName);
+                            subDirectory = new VsDirectoryItem(subDirectoryName);
                             processedDirectoryParent.ChildItems.Add(subDirectory);
                         }
 
@@ -94,7 +94,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                     }
 
                     var projectFileName = GetFileNameWithoutExtension(filePathParts[filePathParts.Length - 1]);
-                    var projectDirectory = new VsSolution(projectFileName, filePath);
+                    var projectDirectory = new VsSolutionItem(projectFileName, filePath);
                     processedDirectoryParent.ChildItems.Add(projectDirectory);
                 }
 
