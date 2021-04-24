@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace MultiSolutionBuild.Commands.ProjectsAdder
 {
-    public sealed class FsItemBuildSolutionItemHierarchyVisitor : IVsSolutionItemVisitor
+    public sealed class VsIBuildSolutionItemHierarchyVisitor : IVsSolutionItemVisitor
     {
         private readonly IList<IVsSolutionItem> _CurrentContextItems;
         private readonly SolutionItemsCount _ItemsCount;
 
-        public FsItemBuildSolutionItemHierarchyVisitor()
+        public VsIBuildSolutionItemHierarchyVisitor()
         {
             _CurrentContextItems = new List<IVsSolutionItem>();
             _ItemsCount = new SolutionItemsCount();
         }
 
-        private FsItemBuildSolutionItemHierarchyVisitor(VsDirectoryItem viewModel,
+        private VsIBuildSolutionItemHierarchyVisitor(VsDirectoryItem viewModel,
             SolutionItemsCount itemsCount)
         {
             _CurrentContextItems = viewModel.ChildItems;
@@ -26,25 +26,13 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         void IVsSolutionItemVisitor.Visit(VsDirectoryItem directory)
         {
-            if (directory.IsSelected == false)
-            {
-                return;
-            }
-
             _ItemsCount.NumberOfSolutionFolders++;
             IVsSolutionItemVisitor childVisitor;
 
-            if (directory.CreateSolutionFolder)
-            {
-                var solutionFolder = new VsDirectoryItem(directory.Name);
-                _CurrentContextItems.Add(solutionFolder);
+            var solutionFolder = new VsDirectoryItem(directory.Name);
+            _CurrentContextItems.Add(solutionFolder);
 
-                childVisitor = new FsItemBuildSolutionItemHierarchyVisitor(solutionFolder, _ItemsCount);
-            }
-            else
-            {
-                childVisitor = this;
-            }
+            childVisitor = new VsIBuildSolutionItemHierarchyVisitor(solutionFolder, _ItemsCount);
 
             foreach (var directoryChild in directory.ChildItems)
             {
@@ -54,11 +42,6 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         void IVsSolutionItemVisitor.Visit(VsSolutionItem project)
         {
-            if (project.IsSelected == false)
-            {
-                return;
-            }
-
             _ItemsCount.NumberOfProjects++;
             var solutionProject = new VsSolutionItem(project.Name, project.FilePath);
             _CurrentContextItems.Add(solutionProject);

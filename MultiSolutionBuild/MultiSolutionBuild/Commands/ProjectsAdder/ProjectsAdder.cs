@@ -78,7 +78,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         private void AddProject(IVsSolutionItem[] fsItemViewModels)
         {
-            var solutionItemHierarchyBuilder = new FsItemBuildSolutionItemHierarchyVisitor();
+            var solutionItemHierarchyBuilder = new VsIBuildSolutionItemHierarchyVisitor();
             var solutionItemHierarchy = solutionItemHierarchyBuilder.BuildSolutionItemHierarchy(fsItemViewModels);
             var addProjectsProgress =
                 new AddMultipleProjectsProgressViewModel(_WindowService, _Solution, this, solutionItemHierarchy);
