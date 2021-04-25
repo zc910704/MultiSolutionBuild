@@ -46,6 +46,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\BuiltDependencyCommand.cs" />
+    <Compile Include="Commands\ProjectsAdder\INVsProject.cs" />
+    <Compile Include="Commands\ProjectsAdder\INVsProjectHierarchy.cs" />
+    <Compile Include="Commands\ProjectsAdder\INVsSolution.cs" />
+    <Compile Include="Commands\ProjectsAdder\INVsSolutionFolder.cs" />
+    <Compile Include="Commands\ProjectsAdder\ISolutionItemViewModel.cs" />
+    <Compile Include="Commands\ProjectsAdder\NVsProject.cs" />
+    <Compile Include="Commands\ProjectsAdder\NVsSolution.cs" />
+    <Compile Include="Commands\ProjectsAdder\NVsSolutionFolder.cs" />
+    <Compile Include="Commands\ProjectsAdder\SolutionItemCreateStatus.cs" />
+    <Compile Include="Commands\ProjectsAdder\SolutionProjectViewModel.cs" />
     <Compile Include="Commands\ProjectsAdder\VsIBuildSolutionItemHierarchyVisitor.cs" />
     <Compile Include="Commands\ProjectsAdder\SolutionItemHierarchy.cs" />
     <Compile Include="Commands\ProjectsAdder\SolutionItemsCount.cs" />
@@ -74,6 +84,7 @@
     <Compile Include="Commands\ProjectsAdder\Counter.cs" />
     <Compile Include="Commands\ProjectsAdder\DirectoryReader.cs" />
     <Compile Include="Commands\ProjectsAdder\FileEnumerationHelper.cs" />
+    <Compile Include="Utilities\VsExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -88,6 +99,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime" />

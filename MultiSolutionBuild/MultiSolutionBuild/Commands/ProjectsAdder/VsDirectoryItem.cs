@@ -8,6 +8,8 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 {
     public sealed class VsDirectoryItem : IVsSolutionItem, IEquatable<VsDirectoryItem>
     {
+        public SolutionItemCreateStatus CreateStatus { get; set; }
+
         public VsDirectoryItem(string directoryName)
         {
             Name = directoryName ?? throw new ArgumentNullException(nameof(directoryName));

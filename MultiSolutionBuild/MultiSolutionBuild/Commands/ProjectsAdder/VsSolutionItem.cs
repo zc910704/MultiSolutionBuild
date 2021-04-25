@@ -8,6 +8,10 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 {
     public class VsSolutionItem : IVsSolutionItem, IEquatable<VsSolutionItem>
     {
+        public SolutionItemCreateStatus CreateStatus { get; set; }
+
+        public string ProjectFilePath { get; }
+
         public VsSolutionItem(string fileName, string filePath)
         {
             Name = fileName ?? throw new ArgumentNullException(nameof(fileName));
