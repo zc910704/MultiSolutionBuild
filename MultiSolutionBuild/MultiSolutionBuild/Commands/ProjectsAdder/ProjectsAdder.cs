@@ -1,7 +1,9 @@
 ﻿using EnvDTE;
+using MultiSolutionBuild.Log;
 using MultiSolutionBuild.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -35,15 +37,12 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         private readonly INVsSolution _Solution;
 
-        public IList<IVsSolutionItem> SolutionItemHierarchy { get; }
+        private readonly OutputPaneLog _OutputPaneLog;
 
-        private readonly IMapper _ViewModelMapper = Mapper.Instance;
-
-#pragma warning disable S1118 // Utility classes should not have public constructors
         public ProjectsAdder(DTE dte)
-#pragma warning restore S1118 // Utility classes should not have public constructors
         {
             DTE = dte;
+            _OutputPaneLog = OutputPaneLog.GetInstance(dte);
         }
 
         public async Task LoadProjects(string folder)
@@ -66,8 +65,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                     progressUpdater);
                 LoadingStatus = "Searching completed. Preparing data for display.";
 
-                var fsItemViewModels = await _ViewModelMapper
-                    .MapFilesToViewModelAsync(folder, files, _LoadingCancelationTokenSource.Token);
+                var fsItemViewModels = await MapFilesToVsSolutionItemAsync(folder, files, _LoadingCancelationTokenSource.Token);
                 await AddProject(fsItemViewModels, _LoadingCancelationTokenSource.Token);
             }
             catch (OperationCanceledException)
@@ -81,19 +79,116 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             }
         }
 
+
+        public Task<IVsSolutionItem[]> MapFilesToVsSolutionItemAsync(
+            string rootDirectoryPath,
+            IEnumerable<string> files,
+            CancellationToken cancellationToken)
+        {
+            return Task.Run(() => MapFilesToVsSolutionItem(rootDirectoryPath, files, cancellationToken).ToArray(), cancellationToken);
+        }
+
+        private string GetFileNameWithoutExtension(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
+        private IEnumerable<IVsSolutionItem> MapFilesToVsSolutionItem(
+            string rootDirectoryPath,
+            IEnumerable<string> files,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(rootDirectoryPath))
+            {
+                throw new ArgumentException($"Value of the {nameof(rootDirectoryPath)} must be not empty string.",
+                    nameof(rootDirectoryPath));
+            }
+
+            if (files == null) throw new ArgumentNullException(nameof(files));
+            return MapFilesToVssolutionItemInner(rootDirectoryPath, files, cancellationToken);
+        }
+
+#pragma warning disable S4456 // Parameter validation in yielding methods should be wrapped
+        private IEnumerable<IVsSolutionItem> MapFilesToVssolutionItemInner(string rootDirectoryPath,
+#pragma warning restore S4456 // Parameter validation in yielding methods should be wrapped
+            IEnumerable<string> files,
+            CancellationToken cancellationToken)
+        {
+            var directorySeparatorChars = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+            var parentPathParts =
+                rootDirectoryPath.Split(directorySeparatorChars, StringSplitOptions.RemoveEmptyEntries);
+            VsDirectoryItem parentDirectory = null;
+            foreach (var filePath in files)
+            {
+                if (filePath == null)
+                {
+                    throw new ArgumentException("One of passed file paths is null.");
+                }
+
+                if (!filePath.StartsWith(rootDirectoryPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException($"Path {filePath} is not child of the {rootDirectoryPath}.");
+                }
+
+                var filePathParts = filePath
+                    .Split(directorySeparatorChars, StringSplitOptions.RemoveEmptyEntries)
+                    .Skip(parentPathParts.Length)
+                    .ToArray();
+
+                if (filePathParts.Length == 1)
+                {
+                    var fileName = GetFileNameWithoutExtension(filePathParts[0]);
+                    yield return new VsSolutionItem(fileName, filePath);
+                }
+                else if (filePathParts.Length > 1)
+                {
+                    if (parentDirectory == null)
+                    {
+                        var parentDirectoryName = parentPathParts[parentPathParts.Length - 1];
+                        parentDirectory = new VsDirectoryItem(parentDirectoryName);
+                    }
+
+                    var processedDirectoryParent = parentDirectory;
+                    for (var i = 0; i < filePathParts.Length - 2; i++)
+                    {
+                        var subDirectoryName = filePathParts[i];
+                        var subDirectory = processedDirectoryParent
+                            .ChildItems
+                            .OfType<VsDirectoryItem>()
+                            .SingleOrDefault(d =>
+                                string.Equals(d.Name, subDirectoryName, StringComparison.OrdinalIgnoreCase));
+                        if (subDirectory == null)
+                        {
+                            subDirectory = new VsDirectoryItem(subDirectoryName);
+                            processedDirectoryParent.ChildItems.Add(subDirectory);
+                        }
+
+                        processedDirectoryParent = subDirectory;
+                    }
+
+                    var projectFileName = GetFileNameWithoutExtension(filePathParts[filePathParts.Length - 1]);
+                    var projectDirectory = new VsSolutionItem(projectFileName, filePath);
+                    processedDirectoryParent.ChildItems.Add(projectDirectory);
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            if (parentDirectory != null)
+            {
+                yield return parentDirectory;
+            }
+        }
+
         private int NumberOfErrors = 0;
         private int NumberOfCreatedSolutionFolders = 0;
         private int NumberOfCreatedSolutionItems = 0;
         private int NumberOfCreatedProjects = 0;
 
-        private async Task AddProject(IVsSolutionItem[] fsItemViewModels, CancellationToken cancellationToken)
+        private async Task AddProject(IVsSolutionItem[] itemInVs, CancellationToken cancellationToken)
         {
-            var solutionItemHierarchyBuilder = new VsIBuildSolutionItemHierarchyVisitor();
-            var solutionItemHierarchy = solutionItemHierarchyBuilder.BuildSolutionItemHierarchy(fsItemViewModels);
-            /*            var addProjectsProgress =
-                            new AddMultipleProjectsProgressViewModel(_WindowService, _Solution, this, solutionItemHierarchy);*/
             var itemsToProcess = new Stack<ProcessingContext>();
-            FillProcessingStack(itemsToProcess, _Solution, SolutionItemHierarchy);
+            FillProcessingStack(itemsToProcess, _Solution, itemInVs);
 
             while (itemsToProcess.Any())
             {

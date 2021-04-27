@@ -20,7 +20,7 @@ namespace MultiSolutionBuild.Utilities
 			return new DisposeAction(() =>
 			{
 				var time = sw.Elapsed;
-				Log.D(context + ": {@tm}", time);
+				//Log.D(context + ": {@tm}", time);
 			});
 #endif
 		}
