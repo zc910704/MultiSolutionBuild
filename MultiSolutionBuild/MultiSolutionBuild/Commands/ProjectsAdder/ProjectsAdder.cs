@@ -138,7 +138,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                 if (filePathParts.Length == 1)
                 {
                     var fileName = GetFileNameWithoutExtension(filePathParts[0]);
-                    yield return new VsSolutionItem(fileName, filePath);
+                    yield return new VsProject(fileName, filePath);
                 }
                 else if (filePathParts.Length > 1)
                 {
@@ -167,7 +167,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                     }
 
                     var projectFileName = GetFileNameWithoutExtension(filePathParts[filePathParts.Length - 1]);
-                    var projectDirectory = new VsSolutionItem(projectFileName, filePath);
+                    var projectDirectory = new VsProject(projectFileName, filePath);
                     processedDirectoryParent.ChildItems.Add(projectDirectory);
                 }
 
@@ -203,7 +203,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                         }
 
                         break;
-                    case VsSolutionItem project:
+                    case VsProject project:
                         CreateProject(item.Parent, project);
                         break;
                     default:
@@ -241,7 +241,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             }
         }
 
-        private INVsProject CreateProject(INVsProjectHierarchy parent, VsSolutionItem project)
+        private INVsProject CreateProject(INVsProjectHierarchy parent, VsProject project)
         {
             // TODO: Add logging of the error to the output window
             try

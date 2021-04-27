@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 namespace MultiSolutionBuild.Commands.ProjectsAdder
 {
-    public class VsSolutionItem : IVsSolutionItem, IEquatable<VsSolutionItem>
+    public sealed class VsProject : IVsSolutionItem, IEquatable<VsProject>
     {
         public SolutionItemCreateStatus CreateStatus { get; set; }
 
         public string ProjectFilePath { get; }
 
-        public VsSolutionItem(string fileName, string filePath)
+        public string Name { get; }
+
+        public VsDirectoryItem Parent { get; set; }
+
+        public VsProject(string fileName, string filePath)
         {
             Name = fileName ?? throw new ArgumentNullException(nameof(fileName));
             FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
@@ -20,7 +24,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         public string FilePath { get; }
 
-        public bool Equals(VsSolutionItem other)
+        public bool Equals(VsProject other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -39,16 +43,12 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             return Enumerable.Empty<IVsSolutionItem>();
         }
 
-        public string Name { get; }
-
-        public VsDirectoryItem Parent { get; set; }
-
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((VsSolutionItem)obj);
+            return Equals((VsProject)obj);
         }
 
         public override int GetHashCode()

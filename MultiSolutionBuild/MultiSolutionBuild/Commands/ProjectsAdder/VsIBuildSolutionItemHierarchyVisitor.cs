@@ -40,10 +40,10 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             }
         }
 
-        void IVsSolutionItemVisitor.Visit(VsSolutionItem project)
+        void IVsSolutionItemVisitor.Visit(VsProject project)
         {
             _ItemsCount.NumberOfProjects++;
-            var solutionProject = new VsSolutionItem(project.Name, project.FilePath);
+            var solutionProject = new VsProject(project.Name, project.FilePath);
             _CurrentContextItems.Add(solutionProject);
         }
 

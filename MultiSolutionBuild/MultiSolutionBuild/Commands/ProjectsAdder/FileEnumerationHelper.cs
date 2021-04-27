@@ -34,7 +34,7 @@ namespace MultiSolutionBuild.Utilities
             CancellationToken cancellationToken,
             IProgress<int> numberOfFoundFilesProgress)
         {
-            var fileCount = new Counter();
+            int fileCount = 0;
             var task = Task.Run(() =>
             {
                 if (!_DirectoryReader.Exists(directoryPath))
@@ -51,12 +51,8 @@ namespace MultiSolutionBuild.Utilities
                         .Aggregate(new List<string>(), (list, file) =>
                         {
                             cancellationToken.ThrowIfCancellationRequested();
-                            var currentCounter = fileCount.Add(1);
-                            if (currentCounter % 5 == 0)
-                            {
-                                numberOfFoundFilesProgress.Report(currentCounter);
-                            }
-
+                            Interlocked.Increment(ref fileCount);
+                            numberOfFoundFilesProgress.Report(fileCount);
                             list.Add(file);
                             return list;
                         })
@@ -64,7 +60,7 @@ namespace MultiSolutionBuild.Utilities
                     .ToArray();
             }, cancellationToken);
             var items = await task;
-            numberOfFoundFilesProgress.Report(fileCount.Value);
+            numberOfFoundFilesProgress.Report(fileCount);
             return items;
         }
     }

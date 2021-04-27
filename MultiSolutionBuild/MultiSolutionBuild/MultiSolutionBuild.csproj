@@ -61,7 +61,7 @@
     <Compile Include="Commands\ProjectsAdder\SolutionItemsCount.cs" />
     <Compile Include="Commands\ProjectsAdder\VsItemCollection.cs" />
     <Compile Include="Commands\ProjectsAdder\VsDirectoryItem.cs" />
-    <Compile Include="Commands\ProjectsAdder\VsSolutionItem.cs" />
+    <Compile Include="Commands\ProjectsAdder\VsProject.cs" />
     <Compile Include="Commands\ProjectsAdder\IVsSolutionItem.cs" />
     <Compile Include="Commands\ProjectsAdder\IVsSolutionItemVisitor.cs" />
     <Compile Include="Commands\ProjectsAdder\ProjectsAdder.cs" />
@@ -78,7 +78,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MultiSolutionBuildPackage.cs" />
     <Compile Include="Utilities\DevTools.cs" />
-    <Compile Include="Commands\ProjectsAdder\Counter.cs" />
     <Compile Include="Commands\ProjectsAdder\DirectoryReader.cs" />
     <Compile Include="Commands\ProjectsAdder\FileEnumerationHelper.cs" />
     <Compile Include="Utilities\VsExtensions.cs" />

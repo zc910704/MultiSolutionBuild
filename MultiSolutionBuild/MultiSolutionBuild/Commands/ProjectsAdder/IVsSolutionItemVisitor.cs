@@ -9,6 +9,6 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
     public interface IVsSolutionItemVisitor
     {
         void Visit(VsDirectoryItem directory);
-        void Visit(VsSolutionItem project);
+        void Visit(VsProject project);
     }
 }
