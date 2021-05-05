@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using MultiSolutionBuild.Extension;
 using MultiSolutionBuild.Log;
 using MultiSolutionBuild.Utilities;
 using System;
@@ -35,7 +36,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         public static DTE DTE { get; private set; }
 
-        private readonly INVsSolution _Solution;
+        private readonly Solution _Solution;
 
         private readonly OutputPaneLog _OutputPaneLog;
 
@@ -65,8 +66,8 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                     progressUpdater);
                 LoadingStatus = "Searching completed. Preparing data for display.";
 
-                var fsItemViewModels = await MapFilesToVsSolutionItemAsync(folder, files, _LoadingCancelationTokenSource.Token);
-                await AddProject(fsItemViewModels, _LoadingCancelationTokenSource.Token);
+                var item_in_solution = await MapFilesToVsSolutionItemAsync(folder, files, _LoadingCancelationTokenSource.Token);
+                await AddProject(item_in_solution, _LoadingCancelationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -80,17 +81,12 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
         }
 
 
-        public Task<IVsSolutionItem[]> MapFilesToVsSolutionItemAsync(
+        private Task<IVsSolutionItem[]> MapFilesToVsSolutionItemAsync(
             string rootDirectoryPath,
             IEnumerable<string> files,
             CancellationToken cancellationToken)
         {
             return Task.Run(() => MapFilesToVsSolutionItem(rootDirectoryPath, files, cancellationToken).ToArray(), cancellationToken);
-        }
-
-        private string GetFileNameWithoutExtension(string fileName)
-        {
-            return Path.GetFileNameWithoutExtension(fileName);
         }
 
         private IEnumerable<IVsSolutionItem> MapFilesToVsSolutionItem(
@@ -137,7 +133,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
                 if (filePathParts.Length == 1)
                 {
-                    var fileName = GetFileNameWithoutExtension(filePathParts[0]);
+                    var fileName = Path.GetFileNameWithoutExtension(filePathParts[0]);
                     yield return new VsProject(fileName, filePath);
                 }
                 else if (filePathParts.Length > 1)
@@ -166,7 +162,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
                         processedDirectoryParent = subDirectory;
                     }
 
-                    var projectFileName = GetFileNameWithoutExtension(filePathParts[filePathParts.Length - 1]);
+                    var projectFileName = Path.GetFileNameWithoutExtension(filePathParts[filePathParts.Length - 1]);
                     var projectDirectory = new VsProject(projectFileName, filePath);
                     processedDirectoryParent.ChildItems.Add(projectDirectory);
                 }
@@ -188,7 +184,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
         private async Task AddProject(IVsSolutionItem[] itemInVs, CancellationToken cancellationToken)
         {
             var itemsToProcess = new Stack<ProcessingContext>();
-            FillProcessingStack(itemsToProcess, _Solution, itemInVs);
+            FillProcessingStack(itemsToProcess, null, itemInVs);
 
             while (itemsToProcess.Any())
             {
@@ -215,16 +211,16 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             }
         }
 
-        private INVsProjectHierarchy CreateDirectory(
-          INVsProjectHierarchy parent, VsDirectoryItem directory)
+        private VsDirectoryItem CreateDirectory(
+          VsDirectoryItem parent, VsDirectoryItem directory)
         {
             // TODO: Add logging of the error to the output window
             try
             {
                 directory.CreateStatus = SolutionItemCreateStatus.InProgress;
                 var solutionFolder =
-                    parent.GetSolutionFolder(directory.Name) ??
-                    parent.AddSolutionFolder(directory.Name);
+                    _Solution.GetSolutionFolder(directory.Name) ??
+                    _Solution.AddSolutionFolder(directory.Name);
                 directory.CreateStatus = SolutionItemCreateStatus.Added;
                 return solutionFolder;
             }
@@ -241,26 +237,23 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
             }
         }
 
-        private INVsProject CreateProject(INVsProjectHierarchy parent, VsProject project)
+        private VsProject CreateProject(VsDirectoryItem parent, VsProject project)
         {
             // TODO: Add logging of the error to the output window
             try
             {
                 project.CreateStatus = SolutionItemCreateStatus.InProgress;
                 var solutionProject =
-                    parent.GetProjectByFilePath(project.ProjectFilePath);
+                    _Solution.GetProjectByFilePath(project.ProjectFilePath);
                 if (solutionProject == null)
                 {
                     try
                     {
-                        solutionProject = parent.AddExistingProject(project.ProjectFilePath);
+                        solutionProject = _Solution.AddExistingProject(project.ProjectFilePath);
                     }
                     catch
                     {
-                        var projectInDifferentLocation =
-                            _Solution.GetProjectFromAnywhereInSolution(project.ProjectFilePath);
-                        projectInDifferentLocation?.Remove();
-                        solutionProject = parent.AddExistingProject(project.ProjectFilePath);
+
                     }
                 }
 
@@ -282,7 +275,7 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
 
         private void FillProcessingStack(
             Stack<ProcessingContext> itemsToProcess,
-            INVsProjectHierarchy parentItem,
+            VsDirectoryItem parentItem,
             IEnumerable<IVsSolutionItem> solutionItems)
         {
             foreach (var solutionItem in solutionItems)
@@ -294,14 +287,14 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
         public class ProcessingContext
         {
             public ProcessingContext(
-                INVsProjectHierarchy parent,
+                VsDirectoryItem parent,
                 IVsSolutionItem solutionItem)
             {
                 Parent = parent;
                 SolutionItem = solutionItem;
             }
 
-            public INVsProjectHierarchy Parent { get; }
+            public VsDirectoryItem Parent { get; }
             public IVsSolutionItem SolutionItem { get; }
         }
     }

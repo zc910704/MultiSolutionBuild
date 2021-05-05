@@ -1,4 +1,7 @@
-﻿using System;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell;
+using MultiSolutionBuild.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -54,6 +57,22 @@ namespace MultiSolutionBuild.Commands.ProjectsAdder
         public override int GetHashCode()
         {
             return StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
+        }
+
+        public VsDirectoryItem GetSolutionFolder(string name,Solution solution)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var solutionFolder = solution
+                .Projects
+                .Cast<Project>()
+                .FilterToSolutionFolders()
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
+                .Where(sf => string.Equals(sf.Name, name, StringComparison.OrdinalIgnoreCase))
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
+                .Select(sf => new VsDirectoryItem(sf.FileName))
+                .SingleOrDefault();
+            return solutionFolder;
         }
     }
 }

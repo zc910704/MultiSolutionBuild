@@ -46,18 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\BuiltDependencyCommand.cs" />
-    <Compile Include="Commands\ProjectsAdder\INVsProject.cs" />
-    <Compile Include="Commands\ProjectsAdder\INVsProjectHierarchy.cs" />
-    <Compile Include="Commands\ProjectsAdder\INVsSolution.cs" />
-    <Compile Include="Commands\ProjectsAdder\INVsSolutionFolder.cs" />
-    <Compile Include="Commands\ProjectsAdder\ISolutionItemViewModel.cs" />
-    <Compile Include="Commands\ProjectsAdder\NVsProject.cs" />
-    <Compile Include="Commands\ProjectsAdder\NVsSolution.cs" />
-    <Compile Include="Commands\ProjectsAdder\NVsSolutionFolder.cs" />
     <Compile Include="Commands\ProjectsAdder\SolutionItemCreateStatus.cs" />
-    <Compile Include="Commands\ProjectsAdder\SolutionProjectViewModel.cs" />
-    <Compile Include="Commands\ProjectsAdder\VsIBuildSolutionItemHierarchyVisitor.cs" />
-    <Compile Include="Commands\ProjectsAdder\SolutionItemHierarchy.cs" />
     <Compile Include="Commands\ProjectsAdder\SolutionItemsCount.cs" />
     <Compile Include="Commands\ProjectsAdder\VsItemCollection.cs" />
     <Compile Include="Commands\ProjectsAdder\VsDirectoryItem.cs" />
