@@ -12,6 +12,7 @@ using MultiSolutionBuild.Extension;
 using Task = System.Threading.Tasks.Task;
 using Microsoft;
 using MultiSolutionBuild.OptionPage;
+using MultiSolutionBuild.Commands.ProjectsAdder;
 
 namespace MultiSolutionBuild
 {
@@ -61,6 +62,8 @@ namespace MultiSolutionBuild
             private set;
         }
 
+        public static DTE DTE { get; private set; }
+
 
 
         /// <summary>
@@ -89,7 +92,7 @@ namespace MultiSolutionBuild
 
             Instance = new BuiltDependencyCommand(package, commandService);
 
-            var dte = await package.GetServiceAsync(typeof(DTE)) as DTE;
+            DTE = await package.GetServiceAsync(typeof(DTE)) as DTE;
            /* var projects = DTE.Solution.GetDescendantProjects();
 
             foreach (var prj in projects)
@@ -123,7 +126,9 @@ namespace MultiSolutionBuild
             // Call the Instance singleton from the UI thread is easy
             string[] solutionLocations = GeneralOptions.Instance.SolutionLocations;
 
+            ProjectsAdder adder = new ProjectsAdder(DTE);
 
+            adder.LoadProjects(solutionLocations[0]);
                 /*System.Threading.Tasks.Task.Run(async () =>
                 {
                     // Make the call to GetLiveInstanceAsync from a background thread to avoid blocking the UI thread
